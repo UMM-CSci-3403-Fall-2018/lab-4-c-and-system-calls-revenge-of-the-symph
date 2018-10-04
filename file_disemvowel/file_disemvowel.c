@@ -42,7 +42,7 @@ int countVowel(char *str)
   return count;
 }
 
-char *disemvowel(char *str)
+char *disemvowel(char *str, int lengthOfString)
 {
 	//COMPILING SHORTCUT
 	// g++ -Wall -g -o disemvowel_test disemvowel_test.cpp disemvowel.c -lgtest
@@ -50,15 +50,19 @@ char *disemvowel(char *str)
 	// valgrind --leak-check=full ./disemvowel_test
 	// valgrind --leak-check=full ./main < sample_input.txt
 
+	char* nullTerminatedString = (char* )calloc(sizeof(char), lengthOfString+1);
+	strcpy(nullTerminatedString, str);
+	nullTerminatedString[lengthOfString+1] = '\0';
+
 
 	//Store length of string
-	int old_string_length = strlen(str);
+	int old_string_length = strlen(nullTerminatedString);
 	
 	//Test if string contains content
 	if(old_string_length > 0)
 	{
 		//Determine amount of memory to allocate
-		int old_string_vowels = countVowel(str);
+		int old_string_vowels = countVowel(nullTerminatedString);
 		int new_string_length = old_string_length - old_string_vowels;
 		char *result = (char*) calloc(new_string_length + 1, sizeof(char)); //Null terminator is NOT included in the size of a string.
 
@@ -69,10 +73,10 @@ char *disemvowel(char *str)
 		for (int i = 0; i < old_string_length; i++)
 		{
 			//Check to see if it is NOT a vowel
-			if(!isVowel(str[i]))
+			if(!isVowel(nullTerminatedString[i]))
 			{
 				//If it isn't, add it to the next spot in our string
-				result[resultIndex] = str[i];
+				result[resultIndex] = nullTerminatedString[i];
 				resultIndex++;
 			}
 		}
@@ -86,8 +90,10 @@ char *disemvowel(char *str)
 	else
 	{
 		
-		return str;
+		return nullTerminatedString;
 	}
+
+	free(nullTerminatedString);
 
 }
 

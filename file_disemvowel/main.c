@@ -18,20 +18,20 @@ int main(int argc, char *argv[]) {
 	  line = (char*) malloc (size + 1);
   
 	  while (getline(&line, &size, stdin) > 0) {
-	    char* output = disemvowel(line);
+	    char* output = disemvowel(line, sizeof(line)/sizeof(char));
 	    printf("%s\n", output);
 	    free(output);
   	}
   	free(line);
 
   } else if(argc == 2) {
-	  readFile = fopen(argv[0], "r");
+	  readFile = fopen(argv[1], "r");
 
-	  char* readOutput = (char *)malloc(BUF_SIZE);
+	  char* readOutput = (char* )calloc(BUF_SIZE, sizeof(char));
           int lastReadSize = fread(readOutput, sizeof(char), BUF_SIZE, readFile);
          
           while(lastReadSize != 0){
-                  char* disemvowledFile = disemvowel(readOutput);
+                  char* disemvowledFile = disemvowel(readOutput, lastReadSize);
 		  printf("%s\n", disemvowledFile);
 		  lastReadSize = fread(readOutput, sizeof(char), BUF_SIZE, readFile);
           }
@@ -39,16 +39,16 @@ int main(int argc, char *argv[]) {
 	  free(readOutput);
           fclose(readFile);
   } else {
-	  readFile = fopen(argv[0], "r");
-	  writeFile = fopen(argv[1], "w");
+	  readFile = fopen(argv[1], "r");
+	  writeFile = fopen(argv[2], "w");
 
-	  char* readOutput = (char *)malloc(BUF_SIZE);
+	  char* readOutput = (char *)calloc(BUF_SIZE, sizeof(char));
 	  int lastReadSize = fread(readOutput, sizeof(char), BUF_SIZE, readFile);
 
 	  while(lastReadSize != 0){
-		  char* disemvowledFile = disemvowel(readOutput);
+		  char* disemvowledFile = disemvowel(readOutput, lastReadSize);
 		  fwrite(disemvowledFile, 1024, 1, writeFile);
-		  lastReadSize = fread(readOutput, 1024, 1, readFile);
+		  lastReadSize = fread(readOutput, sizeof(char), BUF_SIZE, readFile);
 	  }
 
 	  free(readOutput);
