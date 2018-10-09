@@ -9,13 +9,16 @@
 static int num_dirs, num_regular;
 
 bool is_dir(const char* path) {
-  /*
-   * Use the stat() function (try "man 2 stat") to determine if the file
-   * referenced by path is a directory or not.  Call stat, and then use
-   * S_ISDIR to see if the file is a directory. Make sure you check the
-   * return value from stat in case there is a problem, e.g., maybe the
-   * the file doesn't actually exist.
-   */
+	struct stat * buf;
+	buf = (struct stat*) malloc(sizeof(struct stat));
+	int result = stat(path, buf);
+	if(result == 0){
+		return S_ISDIR(buf->st_mode);
+	} else {
+		printf("Something went wrong with stat, likely file is not defined");
+		return false;
+	}
+
 }
 
 /* 
@@ -25,7 +28,21 @@ bool is_dir(const char* path) {
 void process_path(const char*);
 
 void process_directory(const char* path) {
-  /*
+	opendir(path);
+	chdir(path);
+	DIR *dir = readdir(path);
+	while(*dir != NULL){
+		if(*dir != "." || *dir != ".."){
+			process_path(*dir);
+			next_struct = readdir(path);
+		}
+	 else {
+		*dir = readdir(path);
+	}
+	}
+	closedir(path);
+	chdir("..");
+	/*
    * Update the number of directories seen, use opendir() to open the
    * directory, and then use readdir() to loop through the entries
    * and process them. You have to be careful not to process the
@@ -46,9 +63,11 @@ void process_file(const char* path) {
 
 void process_path(const char* path) {
   if (is_dir(path)) {
-    process_directory(path);
+	  num_dirs++;
+	  process_directory(path);
   } else {
-    process_file(path);
+	  num_regular++;
+      	  process_file(path);
   }
 }
 
