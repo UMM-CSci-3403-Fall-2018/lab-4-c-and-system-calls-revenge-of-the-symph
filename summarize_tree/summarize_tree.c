@@ -5,17 +5,26 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
 static int num_dirs, num_regular;
 
 bool is_dir(const char* path) {
+	//printf("Checking if the path is a directory \n");
 	struct stat * buf;
-	buf = (struct stat*) malloc(sizeof(struct stat));
+	buf = (struct stat *) malloc(sizeof(struct stat));
 	int result = stat(path, buf);
 	if(result == 0){
-		return S_ISDIR(buf->st_mode);
+		if(S_ISDIR(buf->st_mode)) {
+			free(buf);
+			return true;
+		}
+		else {
+			free(buf);
+			return false;}
 	} else {
 		printf("Something went wrong with stat, likely file is not defined");
+		free(buf);
 		return false;
 	}
 
@@ -28,19 +37,22 @@ bool is_dir(const char* path) {
 void process_path(const char*);
 
 void process_directory(const char* path) {
-	opendir(path);
-	chdir(path);
-	DIR *dir = readdir(path);
-	while(*dir != NULL){
-		if(*dir != "." || *dir != ".."){
-			process_path(*dir);
-			next_struct = readdir(path);
+	DIR * dir = opendir(path);
+	int changed = chdir(path);
+	if(changed == -1){
+		printf("Error = %d", errno);
+	}
+		struct dirent * fileOrDirectory = readdir(dir);
+	while(fileOrDirectory != NULL){
+		//printf("d_name = %s.\n", fileOrDirectory->d_name);
+		if(strcmp((*fileOrDirectory).d_name, ".") != 0 && strcmp((*fileOrDirectory).d_name, "..") != 0){
+			//printf("About to process %s.\n", fileOrDirectory->d_name);
+			process_path((*fileOrDirectory).d_name);
 		}
-	 else {
-		*dir = readdir(path);
+		
+		fileOrDirectory = readdir(dir);
 	}
-	}
-	closedir(path);
+	closedir(dir);
 	chdir("..");
 	/*
    * Update the number of directories seen, use opendir() to open the
@@ -62,12 +74,15 @@ void process_file(const char* path) {
 }
 
 void process_path(const char* path) {
+	//printf("The path is: ");
+	//printf(path);
   if (is_dir(path)) {
+	  //printf("Got a directory, processing\n");
 	  num_dirs++;
 	  process_directory(path);
   } else {
+	  //printf("Got a normal file\n");
 	  num_regular++;
-      	  process_file(path);
   }
 }
 
@@ -82,6 +97,7 @@ int main (int argc, char *argv[]) {
   num_dirs = 0;
   num_regular = 0;
 
+  //printf("Calling process path\n");
   process_path(argv[1]);
 
   printf("There were %d directories.\n", num_dirs);
