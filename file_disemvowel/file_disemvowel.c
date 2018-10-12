@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 	    }
 
 	    free(line);
-
+	    exit(0);
     }
 
     if(argc == 2) {
