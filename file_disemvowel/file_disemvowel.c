@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <stdbool.h>
+
+#include "disemvowel.h"
 
 #define BUF_SIZE 1024
 
@@ -44,7 +45,7 @@ int copy_non_vowels(int num_chars, char* in_buf, char* out_buf) {
 	return out_buf_index;
 }
 
-void disemvowel(FILE* inputFile, FILE* outputFile) { 
+void disemvowelFile(FILE* inputFile, FILE* outputFile) { 
     
 //	printf("Entered disemvowel\n");
 	//fopen(inputFile, "r");
@@ -82,16 +83,19 @@ int main(int argc, char *argv[]) {
 	   // printf("Setting up input output files\n");
 	    char *line;
 	    size_t size;
+	    char *disemvoweled;
 
 	    size = 100;
 	    line = (char*) malloc(size + 1);
-
+	    
 	    while(getline(&line, &size, stdin) > 0){
-	    inputFile = stdin;
-	    outputFile = stdout;
-	    disemvowel(inputFile, outputFile);
+		    disemvoweled = disemvowel(line);
+		    printf("%s\n", disemvoweled);
+		    free(disemvoweled);
 	    }
+
 	    free(line);
+
     }
 
     if(argc == 2) {
@@ -105,7 +109,7 @@ int main(int argc, char *argv[]) {
     }
 
   //  printf("Calling disemvowel\n");
-    disemvowel(inputFile, outputFile);
+    disemvowelFile(inputFile, outputFile);
 
     return 0; 
 }
